@@ -19,21 +19,25 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
 
       - name: Build APK with Gradle
-        run: ./gradlew assembleRelease --stacktrace
+        run: ./gradlew assembleRelease --stacktrace || ./gradlew assembleDebug --stacktrace
 
-      - name: Prepare APK Output
+      - name: Locate and Prepare APK
         run: |
-          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            cp app/build/outputs/apk/release/app-release.apk Boyon-OMS-v1.0.apk
+          APK_FILE=$(find app/build/outputs/apk/ -type f -name "*.apk" | head -n 1)
+          if [ -n "$APK_FILE" ]; then
+            echo "Found APK at $APK_FILE"
+            cp "$APK_FILE" Boyon-OMS-v1.0.apk
           else
-            ./gradlew assembleDebug
-            cp app/build/outputs/apk/debug/app-debug.apk Boyon-OMS-v1.0.apk
+            echo "Error: No APK file found in build outputs!"
+            exit 1
           fi
 
       - name: Upload Boyon OMS APK Artifact
