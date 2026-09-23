@@ -7,12 +7,23 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.webkit.JavascriptInterface
 import android.widget.Toast
+import androidx.core.app.NotificationManagerCompat
 
 class WebAppInterface(private val context: Context) {
 
     @JavascriptInterface
     fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    @JavascriptInterface
+    fun showPushNotification(title: String, message: String, targetUrl: String?) {
+        NotificationHelper.showNotification(context, title, message, targetUrl)
+    }
+
+    @JavascriptInterface
+    fun hasNotificationPermission(): Boolean {
+        return NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
     @JavascriptInterface

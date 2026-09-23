@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private var backPressedTime: Long = 0
     private var pendingPermissionRequest: PermissionRequest? = null
 
-    private val targetUrl = "https://aio-vault-manager.vercel.app"
+    private val defaultTargetUrl = "https://aio-vault-manager.vercel.app"
 
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -61,20 +61,67 @@ class MainActivity : AppCompatActivity() {
         pendingPermissionRequest = null
     }
 
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Toast.makeText(
+                this,
+                "Notifications disabled. You can enable them anytime in Settings for order alerts.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize notification channel for high-priority order alerts
+        NotificationHelper.createNotificationChannel(this)
+        requestNotificationPermissionIfNeeded()
 
         setupBackNavigation()
         setupSwipeRefresh()
         setupRetryButton()
         setupWebView()
 
+        val initialUrl = resolveInitialUrl(intent)
+
         if (savedInstanceState == null) {
-            loadDashboard()
+            loadUrl(initialUrl)
         } else {
             binding.webView.restoreState(savedInstanceState)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val deepLinkUrl = intent?.getStringExtra("TARGET_URL")
+        if (!deepLinkUrl.isNullOrBlank()) {
+            val fullUrl = if (deepLinkUrl.startsWith("http")) deepLinkUrl else "$defaultTargetUrl$deepLinkUrl"
+            binding.webView.loadUrl(fullUrl)
+        }
+    }
+
+    private fun resolveInitialUrl(intent: Intent?): String {
+        val targetPath = intent?.getStringExtra("TARGET_URL")
+        return if (!targetPath.isNullOrBlank()) {
+            if (targetPath.startsWith("http")) targetPath else "$defaultTargetUrl$targetPath"
+        } else {
+            defaultTargetUrl
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
     }
 
@@ -115,7 +162,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRetryButton() {
         binding.btnRetry.setOnClickListener {
-            loadDashboard()
+            loadUrl(resolveInitialUrl(intent))
         }
     }
 
@@ -179,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // If opening external domain like courier tracking, open cleanly or load inside
+                // If opening external domain like courier tracking, open cleanly in external browser
                 if (url.contains("steadfast.com.bd") || url.contains("packzy.com")) {
                     try {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -242,10 +289,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadDashboard() {
+    private fun loadUrl(url: String) {
         if (isNetworkAvailable()) {
             showWebView()
-            binding.webView.loadUrl(targetUrl)
+            binding.webView.loadUrl(url)
         } else {
             showOfflineView()
         }
