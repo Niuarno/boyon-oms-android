@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Boyon OMS</string>
+    <string name="no_connection">No Internet Connection</string>
+    <string name="check_connection">Please check your Wi-Fi or mobile data connection and try again.</string>
+    <string name="retry">Retry Connection</string>
+    <string name="offline_desc">Offline notification</string>
+    <string name="press_again_to_exit">Press back again to exit</string>
+</resources>

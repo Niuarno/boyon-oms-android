@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.55"
+        android:scaleY="0.55"
+        android:translateX="24.3"
+        android:translateY="24.3">
+        <!-- Rounded square badge -->
+        <path
+            android:fillColor="#10B981"
+            android:pathData="M20,10 L88,10 A16,16 0 0,1 104,26 L104,82 A16,16 0 0,1 88,98 L20,98 A16,16 0 0,1 4,82 L4,26 A16,16 0 0,1 20,10 Z" />
+        <!-- Letter B cutout/shape -->
+        <path
+            android:fillColor="#090D16"
+            android:pathData="M30,26 L56,26 C68,26 74,32 74,40 C74,45 70,49 64,51 C72,53 77,58 77,66 C77,75 70,82 56,82 L30,82 Z M44,38 L44,48 L54,48 C59,48 62,45 62,43 C62,40 59,38 54,38 Z M44,58 L44,70 L55,70 C61,70 64,67 64,64 C64,60 60,58 55,58 Z" />
+    </group>
+</vector>
